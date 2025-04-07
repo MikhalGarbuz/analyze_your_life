@@ -1,0 +1,37 @@
+lifestyle_stats_bot/
+│
+├── bot/                        # Telegram-бот
+│   ├── handlers.py
+│   ├── messages.py
+│   ├── scheduler.py
+│   └── __init__.py
+│
+├── core/                       # Аналітика + робота з БД
+│   ├── database.py
+│   ├── analytics.py
+│   ├── reports.py
+│   ├── utils.py
+│   └── __init__.py
+│
+├── config/                     # Налаштування
+│   ├── settings.py             # змінні середовища, токен, URI БД
+│   └── scheduler_config.py
+│
+├── data/                       # Збереження файлів
+│   ├── user_exports/
+│   └── visualizations/
+│
+├── scripts/                    # Службові скрипти
+│   └── init_db.py
+│
+├── tests/                      # Тестування
+│   ├── test_analytics.py
+│   ├── test_bot_handlers.py
+│   └── ...
+│
+├── .env                        # Змінні середовища (токен, URI БД)
+├── Dockerfile                  # Docker-образ для бота
+├── docker-compose.yml          # Docker-сервіси: бот + БД
+├── requirements.txt            # Залежності
+├── README.md                   # Інструкція
+└── main.py                     # Точка входу (запуск Telegram-бота)
