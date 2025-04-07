@@ -40,37 +40,40 @@ class Regresion(ABC):
         return OrderedModel(Y_variable, X_variables, distr='logit').fit(method='bfgs')
 
 
-class MultipleLinearRegression(Regresion):
-    def __init__(self, X: pd.DataFrame, y: pd.Series):
+class MultipleLinearRegression:
+    def __init__(self, X: pd.DataFrame, y: pd.Series, add_polynomial_terms: bool = False):
         """
-        Створення моделі множинної лінійної регресії.
+        Створює та тренує модель множинної лінійної регресії.
+        Якщо add_polynomial_terms = True — додає квадратичні ознаки.
         """
         if not isinstance(X, pd.DataFrame):
             raise TypeError("X має бути DataFrame")
         if not isinstance(y, (pd.Series, pd.DataFrame)):
             raise TypeError("y має бути Series або DataFrame з одним стовпцем")
 
-        self.X = sm.add_constant(X)
         self.y = y.squeeze()
+        self.feature_names = list(X.columns)
+
+        # Додамо квадратичні ознаки, якщо вказано
+        if add_polynomial_terms:
+            for col in self.feature_names:
+                X[f"{col}_squared"] = X[col] ** 2
+
+        self.X = sm.add_constant(X)
         self.model = sm.OLS(self.y, self.X).fit()
+        self.used_poly = add_polynomial_terms
 
     def summary(self):
-        """
-        Текстовий звіт результатів моделі.
-        """
         return self.model.summary()
 
     def predict(self, new_X: pd.DataFrame) -> pd.Series:
-        """
-        Прогноз на нових даних.
-        """
+        if self.used_poly:
+            for col in self.feature_names:
+                new_X[f"{col}_squared"] = new_X[col] ** 2
         new_X = sm.add_constant(new_X)
         return self.model.predict(new_X)
 
     def coefficients(self) -> pd.DataFrame:
-        """
-        Коефіцієнти + p-values + інтерпретація.
-        """
         df = pd.DataFrame({
             "Coef.": self.model.params,
             "P-value": self.model.pvalues
@@ -80,7 +83,6 @@ class MultipleLinearRegression(Regresion):
             coef = abs(row["Coef."])
             pval = row["P-value"]
 
-            # сила впливу
             if coef > 1.0:
                 strength = "🔴 Дуже сильний"
             elif coef > 0.5:
@@ -92,25 +94,24 @@ class MultipleLinearRegression(Regresion):
             else:
                 strength = "⚪ Майже відсутній"
 
-            # значущість
             if pval < 0.01:
-                significance = "🔥 Надійний (p < 0.01)"
+                significance = "🔥 Надійний"
             elif pval < 0.05:
-                significance = "✅ Значущий (p < 0.05)"
+                significance = "✅ Значущий"
             elif pval < 0.1:
-                significance = "⚠️ На межі (p < 0.1)"
+                significance = "⚠️ На межі"
             else:
-                significance = "❌ Ненадійний (p > 0.1)"
+                significance = "❌ Ненадійний"
 
             return pd.Series([strength, significance])
 
         df[["Сила впливу", "Значущість"]] = df.apply(interpret_row, axis=1)
         return df.round(4)
 
+    def r_squared(self) -> float:
+        return round(self.model.rsquared, 4)
+
     def plot_residuals(self):
-        """
-        Графік залишків.
-        """
         residuals = self.model.resid
         fitted = self.model.fittedvalues
         plt.figure(figsize=(6, 4))
@@ -123,20 +124,10 @@ class MultipleLinearRegression(Regresion):
         plt.tight_layout()
         plt.show()
 
-    def r_squared(self) -> float:
-        """
-        R² (коефіцієнт детермінації).
-        """
-        return round(self.model.rsquared, 4)
-
     def plot_feature_relationship(self, feature_name: str):
-        """
-        Графік: значення ознаки → цільова змінна (розсіювання + лінія регресії).
-        """
         if feature_name not in self.X.columns:
             raise ValueError(f"Ознака '{feature_name}' не знайдена в X")
 
-        # Видаляємо константу, якщо є
         X_plot = self.X.drop(columns="const", errors="ignore")
 
         plt.figure(figsize=(6, 4))
@@ -147,7 +138,6 @@ class MultipleLinearRegression(Regresion):
         plt.grid(True)
         plt.tight_layout()
         plt.show()
-
 
 class OrdinalLogisticRegression(Regresion):
     def __init__(self, X: pd.DataFrame, y: pd.Series):
