@@ -1,17 +1,19 @@
 import asyncio
 import logging
+from data.models import async_main
 
 from aiogram import Bot, Dispatcher
 
 from bot.handlers import router
+from config import TOKEN
 
 
-bot = Bot(token="7265040908:AAHGXHGM84GQ9fn5w4YpqZZyuQvXaPyUSUk")
+bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 
 async def main():
-    #await async_main() for using database
+    await async_main()
     dp.include_router(router)
     await dp.start_polling(bot)
 

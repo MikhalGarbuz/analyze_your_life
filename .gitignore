@@ -1,3 +1,4 @@
 core/visualization.py
 core/database.py
 project_structure.txt
+config.py
