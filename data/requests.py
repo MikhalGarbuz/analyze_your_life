@@ -1,4 +1,4 @@
-from models import async_session, DailyEntry, User
+from .models import async_session, DailyEntry, User
 from sqlalchemy import select
 
 
@@ -73,7 +73,7 @@ async def add_user(tg_id: int, tg_user_name: str, user_chat_id: int) -> None:
         # Check if the user already exists based on Telegram ID
         existing_user = await session.scalar(select(User).where(User.tg_id == tg_id))
         if existing_user is None:
-            new_user = User(tg_id=tg_id, tg_user_name=tg_user_name, user_chat_id=user_chat_id)
+            new_user = User(tg_id=tg_id, username=tg_user_name, user_chat_id=user_chat_id)
             session.add(new_user)
             await session.commit()
 

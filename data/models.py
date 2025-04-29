@@ -17,15 +17,15 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
+    tg_id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
 
-    # Optionally, store configuration in a JSONB column
-    configuration = Column(JSONB, nullable=True)
+    # # Optionally, store configuration in a JSONB column
+    # configuration = Column(JSONB, nullable=True)
+    user_chat_id = Column(Integer)
 
     # Relationship with daily entries
     daily_entries = relationship("DailyEntry", back_populates="user")
-
     def __repr__(self):
         return f"<User(id={self.id}, username={self.username})>"
 
@@ -35,7 +35,7 @@ class DailyEntry(Base):
     __tablename__ = "daily_entries"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.tg_id"), nullable=False)
     entry_date = Column(Date, nullable=False)
     data = Column(JSONB, nullable=False)
 
