@@ -10,6 +10,29 @@ main = ReplyKeyboardMarkup(keyboard = [[KeyboardButton(text = "Наші посл
                             resize_keyboard = True,
                            input_field_placeholder="Вітаю!!! Виберіть пункт меню")
 
+BOOLEAN_CLASS_NUMERIC = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton("Boolean", callback_data="type_boolean")],
+    [InlineKeyboardButton("Class", callback_data="type_class")],
+    [InlineKeyboardButton("Numeric", callback_data="type_numeric")],
+])
+
+ROLE = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton("Independent", callback_data="role_independent"),
+     InlineKeyboardButton("Goal", callback_data="role_goal")],
+])
+
+CREATE = InlineKeyboardMarkup([[InlineKeyboardButton("✅ Create", callback_data="exp_confirm")]])
+
+CANCEL_CONFIRM = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton("✅ Confirm", callback_data="confirm")],
+    [InlineKeyboardButton("❌ Cancel", callback_data="cancel")],
+])
+
+CREATE_FINISH = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton("Create another parameter", callback_data="add_parameter")],
+    [InlineKeyboardButton("Finish", callback_data="finish")],
+])
+
 # async def items(category_id):
 #     all_items = await get_category_item(category_id)
 #     keyboard = InlineKeyboardBuilder()

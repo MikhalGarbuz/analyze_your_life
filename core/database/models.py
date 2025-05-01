@@ -1,4 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, UniqueConstraint
+import enum
+
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, UniqueConstraint, Boolean, Enum
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -13,6 +15,35 @@ async_session = async_sessionmaker(engine)
 
 
 Base = declarative_base()
+
+class ParamType(enum.Enum):
+    BOOLEAN = "boolean"
+    CLASS   = "class"
+    NUMERIC = "numeric"
+
+class Experiment(Base):
+    __tablename__ = "experiments"
+
+    id       = Column(Integer, primary_key=True)
+    user_id  = Column(Integer, ForeignKey("users.id"), nullable=False)
+    name     = Column(String, nullable=False)
+
+    user         = relationship("User", back_populates="experiments")
+    parameters   = relationship("Parameter", back_populates="experiment")
+
+User.experiments = relationship("Experiment", back_populates="user")
+
+class Parameter(Base):
+    __tablename__ = "parameters"
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    experiment_id = Column(Integer, ForeignKey("experiments.id"), nullable=False)
+
+    name = Column(String, nullable=False)
+    is_goal = Column(Boolean, default=False, nullable=False)
+    type = Column(Enum(ParamType, name="param_type"), nullable=False)
+    experiment = relationship("Experiment", back_populates="parameters")
+
 
 class User(Base):
     __tablename__ = "users"

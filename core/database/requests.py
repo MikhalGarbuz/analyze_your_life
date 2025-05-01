@@ -1,19 +1,50 @@
-from .models import async_session, DailyEntry, User
+from .models import async_session, DailyEntry, User, Experiment, Parameter
 from sqlalchemy import select
 
 
+async def add_experiment(user_id: int, name: str) -> Experiment:
+    async with async_session() as session:
+        experiment = Experiment(user_id=user_id, name=name)
+        session.add(experiment)
+        await session.commit()
+        return experiment
+
+
+async def get_list_experiments(user_id: int) -> list[Experiment]:
+    async with async_session() as session:
+        rows = await session.scalars(
+            select(Experiment).where(Experiment.user_id == user_id)
+        )
+        return rows.all()
+
+
+async def add_parameter(
+    user_id, name, is_goal, ptype, exp_id, class_min=None, class_max=None
+):
+    async with async_session() as session:
+        param = Parameter(
+            user_id=user_id,
+            experiment_id=exp_id,
+            name=name,
+            is_goal=is_goal,
+            type=ptype,
+            class_min=class_min,
+            class_max=class_max,
+        )
+        session.add(param)
+        await session.commit()
+        return param
+
+
+async def get_list_parameters(exp_id: int) -> list[Parameter]:
+    async with async_session() as session:
+        rows = await session.scalars(
+            select(Parameter).where(Parameter.experiment_id == exp_id)
+        )
+        return rows.all()
+
+
 async def add_daily_entry(user_id: int, entry_date, data: dict) -> None:
-    """
-    Adds a new daily entry for a user.
-
-    Parameters:
-        user_id (int): The ID of the user.
-        entry_date: The date of the entry (can be a datetime.date or similar).
-        data (dict): A dictionary of daily variable values.
-
-    Returns:
-        None
-    """
     async with async_session() as session:
         # Optionally, you might want to check for an existing entry for the same day if unique constraint is enforced.
         new_entry = DailyEntry(user_id=user_id, entry_date=entry_date , data=data)
@@ -23,11 +54,6 @@ async def add_daily_entry(user_id: int, entry_date, data: dict) -> None:
 
 async def get_daily_entries_for_user(user_id: int):
     """
-    Retrieves all daily entries for a given user.
-
-    Parameters:
-        user_id (int): The ID of the user.
-
     Returns:
         A list of DailyEntry objects.
     """
@@ -38,12 +64,6 @@ async def get_daily_entries_for_user(user_id: int):
 
 async def get_daily_entry_by_date(user_id: int, entry_date):
     """
-    Retrieves the daily entry for a specific user on a specific date.
-
-    Parameters:
-        user_id (int): The ID of the user.
-        entry_date: The date for which to retrieve the entry.
-
     Returns:
         A DailyEntry object or None if no entry is found.
     """
@@ -58,17 +78,6 @@ async def get_daily_entry_by_date(user_id: int, entry_date):
 
 
 async def add_user(tg_id: int, tg_user_name: str, user_chat_id: int) -> None:
-    """
-    Adds a new user to the database if a user with the given tg_id doesn't exist.
-
-    Parameters:
-        tg_id (int): The Telegram ID of the user.
-        tg_user_name (str): The Telegram username.
-        user_chat_id (int): The chat ID for the user.
-
-    Returns:
-        None
-    """
     async with async_session() as session:
         # Check if the user already exists based on Telegram ID
         existing_user = await session.scalar(select(User).where(User.tg_id == tg_id))
@@ -79,15 +88,6 @@ async def add_user(tg_id: int, tg_user_name: str, user_chat_id: int) -> None:
 
 
 async def get_user(tg_id: int) -> User:
-    """
-    Retrieves a user from the database based on the provided Telegram ID.
-
-    Parameters:
-        tg_id (int): The Telegram ID of the user.
-
-    Returns:
-        User: The user object if found, otherwise None.
-    """
     async with async_session() as session:
         user = await session.scalar(select(User).where(User.tg_id == tg_id))
         return user

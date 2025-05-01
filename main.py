@@ -1,10 +1,10 @@
 import asyncio
 import logging
-from data.models import async_main
+from core.database.models import async_main
 
 from aiogram import Bot, Dispatcher
 
-from bot.handlers import router
+from bot.handlers.handlers import router
 from config import TOKEN
 
 

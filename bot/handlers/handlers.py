@@ -36,7 +36,7 @@ async def category(callback: CallbackQuery):
 
 # @router.callback_query(F.data.startswith('item_'))
 # async def category(callback: CallbackQuery):
-#     item_id = int(callback.data.split("_")[1])
+#     item_id   = int(callback.data.split("_")[1])
 #     item_data = await rq.get_item(item_id)
 #     await callback.answer("Ви вибрали товар")
 #     await callback.message.edit_text(f'{item_data.name}\nЦіна: {item_data.price}грн\nОпис: {item_data.description}', reply_markup=await kb.item(item_data.category, item_id))

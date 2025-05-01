@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from config import DATABASE_URL
-from data.models import Base
-import data.requests as requests
-from data.requests import add_user, get_user
+from core.database.models import Base
+import core.database.requests as requests
+from core.database.requests import add_user, get_user
 
 @pytest.mark.asyncio
 async def test_postgres_connection():

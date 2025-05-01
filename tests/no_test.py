@@ -1,6 +1,4 @@
-from data.requests import add_user, add_daily_entry
-from data.models import Base, DailyEntry, User
-from data.models import async_session, async_main
+from core.database.requests import add_user, add_daily_entry
 from datetime import date
 import asyncio
 
