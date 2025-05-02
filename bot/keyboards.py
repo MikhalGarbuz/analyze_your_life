@@ -11,26 +11,33 @@ main = ReplyKeyboardMarkup(keyboard = [[KeyboardButton(text = "Наші посл
                            input_field_placeholder="Вітаю!!! Виберіть пункт меню")
 
 BOOLEAN_CLASS_NUMERIC = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton("Boolean", callback_data="type_boolean")],
-    [InlineKeyboardButton("Class", callback_data="type_class")],
-    [InlineKeyboardButton("Numeric", callback_data="type_numeric")],
+    [
+      InlineKeyboardButton(text="Boolean", callback_data="type_boolean"),
+      InlineKeyboardButton(text="Class",   callback_data="type_class"),
+      InlineKeyboardButton(text="Numeric", callback_data="type_numeric"),
+    ]
 ])
+
+ADD_PARAMETER = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Add parameter", callback_data="add_parameter")]])
 
 ROLE = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton("Independent", callback_data="role_independent"),
-     InlineKeyboardButton("Goal", callback_data="role_goal")],
+    [
+        InlineKeyboardButton(text="Independent", callback_data="role_independent"),
+        InlineKeyboardButton(text="Goal", callback_data="role_goal"),
+    ]
 ])
 
-CREATE = InlineKeyboardMarkup([[InlineKeyboardButton("✅ Create", callback_data="exp_confirm")]])
+CREATE = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="✅ Create", callback_data="exp_confirm")]])
 
-CANCEL_CONFIRM = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton("✅ Confirm", callback_data="confirm")],
-    [InlineKeyboardButton("❌ Cancel", callback_data="cancel")],
+CANCEL_CONFIRM = InlineKeyboardMarkup(inline_keyboard=
+[
+    [InlineKeyboardButton(text="✅ Confirm", callback_data="confirm")],
+    [InlineKeyboardButton(text="❌ Cancel", callback_data="cancel")]
 ])
 
 CREATE_FINISH = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton("Create another parameter", callback_data="add_parameter")],
-    [InlineKeyboardButton("Finish", callback_data="finish")],
+    [InlineKeyboardButton(text="Create another parameter", callback_data="add_parameter")],
+    [InlineKeyboardButton(text="Finish", callback_data="finish")]
 ])
 
 # async def items(category_id):

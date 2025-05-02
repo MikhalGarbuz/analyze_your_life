@@ -1,23 +1,18 @@
-from aiogram import F, Router
-from aiogram.filters import CommandStart, Command
+from aiogram import F
+from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery
-from aiogram.fsm.state import StatesGroup, State
-#from config import info, admin_chat_id
-from aiogram.fsm.context import FSMContext
+from core.database.requests import add_user
+from . import router
 
 
 import bot.keyboards as kb
 #import bot.database.requests as rq
 
-router = Router()
 
-class Reg(StatesGroup):
-    name = State()
-    number = State()
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    #await rq.set_user(message.from_user.id, str(message.from_user.username), message.chat.id)
+    await add_user(message.from_user.id, str(message.from_user.username), message.chat.id)
     await message.reply("Вітаємо у нашому магазині", reply_markup=kb.main)
 
 

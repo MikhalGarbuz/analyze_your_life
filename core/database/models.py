@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, UniqueConstraint, Boolean, Enum
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, UniqueConstraint, Boolean, Enum, BigInteger
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -24,23 +24,27 @@ class ParamType(enum.Enum):
 class Experiment(Base):
     __tablename__ = "experiments"
 
-    id       = Column(Integer, primary_key=True)
-    user_id  = Column(Integer, ForeignKey("users.id"), nullable=False)
-    name     = Column(String, nullable=False)
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.tg_id"), nullable=False)
+    name = Column(String, nullable=False)
 
-    user         = relationship("User", back_populates="experiments")
-    parameters   = relationship("Parameter", back_populates="experiment")
+    user = relationship("User", back_populates="experiments")
+    parameters = relationship("Parameter", back_populates="experiment")
 
-User.experiments = relationship("Experiment", back_populates="user")
 
 class Parameter(Base):
     __tablename__ = "parameters"
 
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.tg_id"), nullable=False)
     experiment_id = Column(Integer, ForeignKey("experiments.id"), nullable=False)
 
     name = Column(String, nullable=False)
     is_goal = Column(Boolean, default=False, nullable=False)
+
+    class_min = Column(Integer, nullable=True)
+    class_max = Column(Integer, nullable=True)
+
     type = Column(Enum(ParamType, name="param_type"), nullable=False)
     experiment = relationship("Experiment", back_populates="parameters")
 
@@ -48,12 +52,14 @@ class Parameter(Base):
 class User(Base):
     __tablename__ = "users"
 
-    tg_id = Column(Integer, primary_key=True)
+    tg_id = Column(BigInteger, primary_key=True)
     username = Column(String, unique=True, nullable=False)
 
     # # Optionally, store configuration in a JSONB column
     # configuration = Column(JSONB, nullable=True)
     user_chat_id = Column(Integer)
+
+    experiments    = relationship("Experiment", back_populates="user")
 
     # Relationship with daily entries
     daily_entries = relationship("DailyEntry", back_populates="user")

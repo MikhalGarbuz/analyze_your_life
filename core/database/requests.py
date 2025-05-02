@@ -7,6 +7,7 @@ async def add_experiment(user_id: int, name: str) -> Experiment:
         experiment = Experiment(user_id=user_id, name=name)
         session.add(experiment)
         await session.commit()
+        await session.refresh(experiment)
         return experiment
 
 
