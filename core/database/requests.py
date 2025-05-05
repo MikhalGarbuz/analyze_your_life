@@ -36,6 +36,12 @@ async def add_parameter(
         await session.commit()
         return param
 
+async def get_parameter(param_id: int) -> Parameter | None:
+    """
+    Fetches a single Parameter by its primary key.
+    """
+    async with async_session() as session:
+        return await session.get(Parameter, param_id)
 
 async def get_list_parameters(exp_id: int) -> list[Parameter]:
     async with async_session() as session:
@@ -45,12 +51,19 @@ async def get_list_parameters(exp_id: int) -> list[Parameter]:
         return rows.all()
 
 
-async def add_daily_entry(user_id: int, entry_date, data: dict) -> None:
+async def add_daily_entry(user_id: int, experiment_id: int, entry_date, data: dict) -> DailyEntry:
+    existing = await get_daily_entry_by_all_conditions(user_id, experiment_id, entry_date)
     async with async_session() as session:
-        # Optionally, you might want to check for an existing entry for the same day if unique constraint is enforced.
-        new_entry = DailyEntry(user_id=user_id, entry_date=entry_date , data=data)
-        session.add(new_entry)
+
+        if existing:
+            # 2a) update its JSON payload
+            existing.data = data
+            entry = existing
+        else:
+            entry = DailyEntry(user_id=user_id, experiment_id= experiment_id, entry_date=entry_date , data=data)
+            session.add(entry)
         await session.commit()
+        return entry
 
 
 async def get_daily_entries_for_user(user_id: int):
@@ -77,6 +90,20 @@ async def get_daily_entry_by_date(user_id: int, entry_date):
         )
         return entry
 
+async def get_daily_entry_by_all_conditions(user_id: int, experiment_id: int, entry_date) -> DailyEntry | None:
+    """
+    Return the existing DailyEntry for this user+experiment+date,
+    or None if none exists.
+    """
+    async with async_session() as session:
+        entry = await session.scalar(
+            select(DailyEntry).where(
+            DailyEntry.user_id == user_id,
+            DailyEntry.experiment_id == experiment_id,
+            DailyEntry.entry_date == entry_date
+            )
+        )
+        return entry
 
 async def add_user(tg_id: int, tg_user_name: str, user_chat_id: int) -> None:
     async with async_session() as session:

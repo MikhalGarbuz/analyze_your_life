@@ -1,8 +1,10 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from core.database.models import Experiment, Parameter
 
 #from bot.database.requests import get_categories, get_category_item
+import core.database.requests as rq
 
 main = ReplyKeyboardMarkup(keyboard = [[KeyboardButton(text = "Наші послуги")],
                                         [KeyboardButton(text = "Про нас")]] ,
@@ -72,6 +74,23 @@ async def item(category_id, item_id):
     keyboard.add(InlineKeyboardButton(text="Назад", callback_data=f"category_{category_id}"))
     return keyboard.as_markup()
 
+async def user_experiments_list(experiments: list[Experiment]):
+    keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [ InlineKeyboardButton(text=exp.name, callback_data=f"sel_exp:{exp.id}") ]
+                for exp in experiments
+            ]
+        )
+    return keyboard
+
+async def parameter_list(params: list[Parameter]):
+    keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text=p.name, callback_data=f"sel_param:{p.id}")]
+                for p in params
+            ] + [[InlineKeyboardButton(text="✅ Done", callback_data="finish")]]
+        )
+    return keyboard
 
 # async def categories():
 #     all_items = await get_categories()

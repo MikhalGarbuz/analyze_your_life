@@ -14,3 +14,9 @@ class EnterValue(StatesGroup):
 class DefineExp(StatesGroup):
     NAME      = State()
     CONFIRM   = State()
+
+class EnterData(StatesGroup):
+    SELECT_EXP = State()
+    SELECT_PARAM = State()
+    WAIT_VALUE = State()
+    CONFIRM_SAVE = State()

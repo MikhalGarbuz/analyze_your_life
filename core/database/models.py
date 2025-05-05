@@ -30,6 +30,8 @@ class Experiment(Base):
 
     user = relationship("User", back_populates="experiments")
     parameters = relationship("Parameter", back_populates="experiment")
+    daily_entries = relationship("DailyEntry", back_populates="experiment")
+
 
 
 class Parameter(Base):
@@ -73,16 +75,18 @@ class DailyEntry(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.tg_id"), nullable=False)
+    experiment_id = Column(Integer, ForeignKey("experiments.id"), nullable=False)
     entry_date = Column(Date, nullable=False)
     data = Column(JSONB, nullable=False)
 
     # Optional unique constraint to ensure one entry per day per user
-    __table_args__ = (UniqueConstraint("user_id", "entry_date", name="_user_date_uc"),)
+    UniqueConstraint("user_id", "experiment_id", "entry_date", name="_user_exp_date_uc"),
 
     user = relationship("User", back_populates="daily_entries")
+    experiment  = relationship("Experiment", back_populates="daily_entries")
 
     def __repr__(self):
-        return f"<DailyEntry(id={self.id}, user_id={self.user_id}, entry_date={self.entry_date})>"
+        return f"<DailyEntry(id={self.id}, user_id={self.user_id}, exp_id={self.experiment_id}, entry_date={self.entry_date})>"
 
 async def async_main():
     async with engine.begin() as conn:
