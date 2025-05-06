@@ -1,5 +1,5 @@
 from .models import async_session, DailyEntry, User, Experiment, Parameter
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 
 async def add_experiment(user_id: int, name: str) -> Experiment:
@@ -10,6 +10,12 @@ async def add_experiment(user_id: int, name: str) -> Experiment:
         await session.refresh(experiment)
         return experiment
 
+async def get_experiment(experiment_id: int) -> Experiment | None:
+    """
+    Return the Experiment with the given ID, or None if not found.
+    """
+    async with async_session() as session:
+        return await session.get(Experiment, experiment_id)
 
 async def get_list_experiments(user_id: int) -> list[Experiment]:
     async with async_session() as session:
@@ -17,6 +23,25 @@ async def get_list_experiments(user_id: int) -> list[Experiment]:
             select(Experiment).where(Experiment.user_id == user_id)
         )
         return rows.all()
+
+async def delete_experiment(experiment_id: int) -> None:
+    """
+    Deletes an Experiment and all its related parameters & daily entries.
+    Manually cascades deletes in case the database constraint was not applied.
+    """
+    async with async_session() as session:
+        # explicitly remove any parameters and entries tied to this experiment
+        await session.execute(
+            delete(Parameter).where(Parameter.experiment_id == experiment_id)
+        )
+        await session.execute(
+            delete(DailyEntry).where(DailyEntry.experiment_id == experiment_id)
+        )
+        # now delete the experiment itself
+        exp = await session.get(Experiment, experiment_id)
+        if exp:
+            await session.delete(exp)
+            await session.commit()
 
 
 async def add_parameter(
@@ -61,7 +86,7 @@ async def add_daily_entry(user_id: int, experiment_id: int, entry_date, data: di
             entry = existing
         else:
             entry = DailyEntry(user_id=user_id, experiment_id= experiment_id, entry_date=entry_date , data=data)
-            session.add(entry)
+        session.add(entry)
         await session.commit()
         return entry
 
@@ -119,3 +144,4 @@ async def get_user(tg_id: int) -> User:
     async with async_session() as session:
         user = await session.scalar(select(User).where(User.tg_id == tg_id))
         return user
+

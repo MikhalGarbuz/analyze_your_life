@@ -1,8 +1,8 @@
 from datetime import date
 
-from aiogram import F, Router
+from aiogram import F
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from bot.states import EnterData
@@ -20,7 +20,32 @@ async def cmd_enter(message: Message, state: FSMContext):
         return await message.answer("You have no experiments yet. Create one with /new")
 
     await state.set_state(EnterData.SELECT_EXP)
-    await state.update_data(day_values={})
+    await state.update_data(entry_date=date.today(), day_values={})
+    await message.answer("🔬 Select experiment:", reply_markup=await kb.user_experiments_list(exps))
+
+
+@router.message(Command("enter_past"))
+async def cmd_enter_past(message: Message, state: FSMContext):
+    await state.set_state(EnterData.DATE)
+    await message.answer("🗓 Send me the date (YYYY-MM-DD) you want to enter data for:")
+
+
+@router.message(EnterData.DATE)
+async def parse_manual_date(message: Message, state: FSMContext):
+    try:
+        chosen = date.fromisoformat(message.text.strip())
+    except ValueError:
+        return await message.answer("❌ Invalid format—use YYYY-MM-DD.")
+
+    if chosen > date.today():
+        return await message.answer(
+            "⚠️ Ви не можете вводити майбутню дату. Вкажіть сьогодні або ранішу.",  parse_mode="Markdown")
+
+        # now stash & proceed exactly like /enter does
+    await state.set_state(EnterData.SELECT_EXP)
+    await state.update_data(entry_date=chosen, day_values={})
+
+    exps = await rq.get_list_experiments(message.from_user.id)
     await message.answer("🔬 Select experiment:", reply_markup=await kb.user_experiments_list(exps))
 
 
@@ -34,9 +59,11 @@ async def select_experiment(query: CallbackQuery, state: FSMContext):
     if not params:
         return await query.message.answer("No parameters defined—add one with /define", show_alert=True)
 
+    day_values = (await state.get_data()).get("day_values", {})
+
 
     await state.set_state(EnterData.SELECT_PARAM)
-    await query.message.edit_text("✏️ Select a parameter to enter:", reply_markup=await kb.parameter_list(params))
+    await query.message.edit_text("✏️ Select a parameter to enter:", reply_markup=await kb.enter_parameter_list(params, set(day_values.keys())))
 
 
 @router.callback_query(EnterData.SELECT_PARAM, F.data.startswith("sel_param:"))
@@ -61,6 +88,7 @@ async def select_parameter(query: CallbackQuery, state: FSMContext):
 @router.callback_query(EnterData.SELECT_PARAM, F.data=="finish")
 async def finish_entry(query: CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    date = data.get("entry_date")
     day_values = data.get("day_values", {})
     exp_id = data.get("exp_id")
 
@@ -71,7 +99,7 @@ async def finish_entry(query: CallbackQuery, state: FSMContext):
         return await query.answer("No experiment selected!", show_alert=True)
 
     # one‐shot save
-    await rq.add_daily_entry( user_id=query.from_user.id, experiment_id = exp_id, entry_date=date.today(), data=day_values)
+    await rq.add_daily_entry( user_id=query.from_user.id, experiment_id = exp_id, entry_date=date, data=day_values)
     await query.message.edit_text("✅ All saved for today!")
     await state.clear()
 
@@ -108,6 +136,8 @@ async def receive_value(message: Message, state: FSMContext):
 
     # go back to parameter‐selection (so they can pick another or Finish)
     params = await rq.get_list_parameters(data["exp_id"])
+    day_values = (await state.get_data())["day_values"]
+
 
     await state.set_state(EnterData.SELECT_PARAM)
-    await message.answer("Noted! Choose next or tap Done:", reply_markup=await kb.parameter_list(params))
+    await message.answer("Noted! Choose next or tap Done:", reply_markup=await kb.enter_parameter_list(params, set(day_values.keys())))

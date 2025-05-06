@@ -3,8 +3,6 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from core.database.models import Experiment, Parameter
 
-#from bot.database.requests import get_categories, get_category_item
-import core.database.requests as rq
 
 main = ReplyKeyboardMarkup(keyboard = [[KeyboardButton(text = "Наші послуги")],
                                         [KeyboardButton(text = "Про нас")]] ,
@@ -42,17 +40,12 @@ CREATE_FINISH = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Finish", callback_data="finish")]
 ])
 
-# async def items(category_id):
-#     all_items = await get_category_item(category_id)
-#     keyboard = InlineKeyboardBuilder()
-#     for item in all_items:
-#         keyboard.row(InlineKeyboardButton(text=f"{item.name} Ціна: {item.price}", callback_data=f"item_{item.id}"))
-#     if category_id ==1:
-#         keyboard.row(InlineKeyboardButton(text="Зв'язатись для бронювання", url = "https://t.me/scuoladilobotomia"))
-#     else:
-#         keyboard.row(InlineKeyboardButton(text="Зв'язатись для купівлі", url= "https://t.me/scuoladilobotomia"))
-#     keyboard.row(InlineKeyboardButton(text="Назад", callback_data="categories"))
-#     return keyboard.as_markup()
+DELETE_CONFIRM = InlineKeyboardMarkup(inline_keyboard=[
+    [
+      InlineKeyboardButton(text="✅ Yes, delete", callback_data="del_confirm:yes"),
+      InlineKeyboardButton(text="❌ No, cancel", callback_data="del_confirm:no"),
+    ]
+])
 
 async def back_to_main():
     keyboard = InlineKeyboardBuilder()
@@ -92,11 +85,13 @@ async def parameter_list(params: list[Parameter]):
         )
     return keyboard
 
-# async def categories():
-#     all_items = await get_categories()
-#     keyboard = InlineKeyboardBuilder()
-#     for item in all_items:
-#         keyboard.add(InlineKeyboardButton(text=item.name, callback_data=f"category_{item.id}"))
-#     keyboard.add(InlineKeyboardButton(text="На головну", callback_data="back_to_main"))
-
-    return keyboard.adjust(2).as_markup()
+async def enter_parameter_list(params: list[Parameter], entered_keys: set[str]):
+    buttons = []
+    for p in params:
+        prefix = "✅" if p.name in entered_keys else "❓"
+        text = f"{prefix} {p.name}"
+        buttons.append([InlineKeyboardButton(text=text,
+                                             callback_data=f"sel_param:{p.id}")])
+        # finally the Done button
+    buttons.append([InlineKeyboardButton(text="🏁 Done", callback_data="finish")])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)

@@ -29,8 +29,8 @@ class Experiment(Base):
     name = Column(String, nullable=False)
 
     user = relationship("User", back_populates="experiments")
-    parameters = relationship("Parameter", back_populates="experiment")
-    daily_entries = relationship("DailyEntry", back_populates="experiment")
+    parameters = relationship("Parameter", back_populates="experiment", cascade="all, delete-orphan", passive_deletes=True)
+    daily_entries = relationship("DailyEntry", back_populates="experiment", cascade="all, delete-orphan", passive_deletes=True)
 
 
 

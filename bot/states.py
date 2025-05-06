@@ -16,7 +16,12 @@ class DefineExp(StatesGroup):
     CONFIRM   = State()
 
 class EnterData(StatesGroup):
+    DATE = State()
     SELECT_EXP = State()
     SELECT_PARAM = State()
     WAIT_VALUE = State()
     CONFIRM_SAVE = State()
+
+class DeleteExp(StatesGroup):
+    SELECT  = State()  
+    CONFIRM = State()
