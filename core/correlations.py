@@ -1,5 +1,8 @@
 import pandas as pd
+import matplotlib
+matplotlib.use('TkAgg')   # або 'Qt5Agg', 'Agg', тощо
 import matplotlib.pyplot  as plt
+from io import BytesIO
 import seaborn as sns
 
 class Сorrelation:
@@ -23,7 +26,7 @@ class Сorrelation:
 
     @staticmethod
     def two_correlation_matrices_chart(kendal_matrix: pd.DataFrame, pearson_martix: pd.DataFrame) -> None:
-        plt.figure(figsize=(12, 5))
+        plt.figure(figsize=(13, 5))
         plt.subplot(1, 2, 1)
         sns.heatmap(kendal_matrix, annot=True, cmap="coolwarm", cbar=False)
         plt.title('Kendall Correlation matrix')
@@ -32,7 +35,7 @@ class Сorrelation:
         sns.heatmap(pearson_martix, annot=True, cmap="coolwarm")
         plt.title('Pearson Correlation matrix')
         plt.tight_layout()
-        plt.show()
+        #plt.show()
         plt.savefig("data/correlation_heatmaps.png")
         plt.close()
 
@@ -42,7 +45,8 @@ class Сorrelation:
         sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", cbar=False)
         plt.title('Correlation matrix')
         plt.tight_layout()
-        plt.show()
+        #plt.show()
+        plt.savefig("data/correlation_heatmaps.png")
         plt.close()
 
 

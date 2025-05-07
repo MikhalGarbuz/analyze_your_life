@@ -130,6 +130,22 @@ async def get_daily_entry_by_all_conditions(user_id: int, experiment_id: int, en
         )
         return entry
 
+async def get_daily_entries_for_experiment(user_id: int, experiment_id: int) -> list[DailyEntry]:
+    """
+    Return all DailyEntry rows for this user+experiment, ordered by date.
+    """
+    async with async_session() as session:
+        stmt = (
+            select(DailyEntry)
+            .where(
+                DailyEntry.user_id == user_id,
+                DailyEntry.experiment_id == experiment_id
+            )
+            .order_by(DailyEntry.entry_date)
+        )
+        result = await session.scalars(stmt)
+        return result.all()
+
 async def add_user(tg_id: int, tg_user_name: str, user_chat_id: int) -> None:
     async with async_session() as session:
         # Check if the user already exists based on Telegram ID

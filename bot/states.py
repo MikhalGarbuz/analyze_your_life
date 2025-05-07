@@ -25,3 +25,6 @@ class EnterData(StatesGroup):
 class DeleteExp(StatesGroup):
     SELECT  = State()  
     CONFIRM = State()
+
+class ShowStats(StatesGroup):
+    SELECT_EXP = State()

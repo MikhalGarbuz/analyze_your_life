@@ -35,7 +35,7 @@ async def remind_missing_entries(bot: Bot):
 
 def make_scheduler(bot: Bot) -> AsyncIOScheduler:
 
-    scheduler = AsyncIOScheduler(bot)
+    scheduler = AsyncIOScheduler()
     # every day at 19:00 local time
     scheduler.add_job(
         remind_missing_entries,
