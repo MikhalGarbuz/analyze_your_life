@@ -3,7 +3,7 @@ import matplotlib.pyplot  as plt
 import seaborn as sns
 import statsmodels.api as sm
 import numpy as  np
-from base_classes import Regresion
+from core.base_classes import Regresion
 
 class MultipleLinearRegression(Regresion):
     def __init__(self, X: pd.DataFrame, y: pd.Series, add_polynomial_terms: bool = False):

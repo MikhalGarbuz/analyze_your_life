@@ -1,8 +1,8 @@
 from statsmodels.miscmodels.ordinal_model import OrderedModel
-import numpy as  np
+import numpy as np
 import pandas as pd
-import matplotlib.pyplot  as plt
-from base_classes import Regresion
+import matplotlib.pyplot as plt
+from core.base_classes import Regresion
 
 
 class OrdinalLogisticRegression(Regresion):

@@ -28,3 +28,7 @@ class DeleteExp(StatesGroup):
 
 class ShowStats(StatesGroup):
     SELECT_EXP = State()
+
+class Analyze(StatesGroup):
+    SELECT_EXP    = State()
+    SELECT_TARGET = State()

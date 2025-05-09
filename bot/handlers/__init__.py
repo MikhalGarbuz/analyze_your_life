@@ -7,3 +7,4 @@ import bot.handlers.handlers
 import bot.handlers.enter_data
 import bot.handlers.delete
 import bot.handlers.correlation
+import bot.handlers.regression
